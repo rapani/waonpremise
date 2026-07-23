@@ -104,13 +104,6 @@ Gateway listen di localhost:
 | HTTP API | `8000` |
 | WebSocket | `8001` |
 
-Tes Node.js harus OK sebelum lanjut ke Apache:
-
-```bash
-curl http://127.0.0.1:8000/
-# harus: OK
-```
-
 ---
 
 ## Langkah 6 — Setup DNS (Subdomain)
@@ -328,7 +321,6 @@ pm2 restart wa
 Pesan **"Network ERROR!"** biasanya muncul karena:
 - Propagasi DNS belum selesai — domain belum dikenali jaringan Anda (tunggu beberapa jam)
 - Port **443** diblokir di VPS, firewall cloud, atau router
-- Apache belum mem-proxy dengan benar (tes `curl https://wa.domainanda.com/` harus `OK`)
 - Node.js/PM2 tidak jalan (`pm2 status`)
 
 ### WebSocket / API gagal — cek log
