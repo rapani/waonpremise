@@ -1,0 +1,22 @@
+{
+  "name": "wagateway_rlradius",
+  "version": "1.0.0",
+  "description": "wagateway untuk aplikasi billing rlradius",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rapani",
+  "license": "MIT",
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "express": "^5.1.0",
+    "node-cache": "^5.1.2",
+    "pino": "^10.1.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "ws": "^8.18.3"
+  }
+}
