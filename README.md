@@ -76,7 +76,6 @@ chmod 644 app.js package.json
 cd /opt/waonpremise
 npm install
 ```
-
 ---
 
 ## Langkah 5 — Jalankan permanen dengan PM2
@@ -87,11 +86,6 @@ cd /opt/waonpremise
 pm2 start app.js --name wa
 pm2 save
 pm2 startup
-```
-
-Perintah berguna:
-
-```bash
 pm2 status
 pm2 logs wa
 pm2 restart wa
@@ -149,23 +143,19 @@ sudo systemctl restart apache2
 
 ### 7.3 VirtualHost port 80 (sebelum SSL)
 
-```bash
-sudo nano /etc/apache2/sites-available/wa-gateway.conf
-```
-
-Isi file dipakai sementara untuk verifikasi Let's Encrypt **hanya port 80**:
+Isi file wa-gateway.conf untuk sementara waktu di pakai untuk verifikasi Let's Encrypt **hanya port 80**:
 
 ```apache
+sudo tee /etc/apache2/sites-available/wa-gateway.conf << 'EOF'
 <VirtualHost *:80>
     ServerName wa.domainanda.com
-
     DocumentRoot /var/www/html
-
     <Directory /var/www/html>
         AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>
+EOF
 ```
 
 Aktifkan site:
@@ -184,50 +174,24 @@ sudo apt install -y certbot python3-certbot-apache
 sudo certbot --apache -d wa.domainanda.com
 ```
 
-Certbot otomatis membuat file SSL:
-
-```
-/etc/apache2/sites-available/wa-gateway-le-ssl.conf
-/etc/apache2/sites-enabled/wa-gateway-le-ssl.conf   (symlink)
-```
-
-Sertifikat tersimpan di:
-
-```
-/etc/letsencrypt/live/wa.domainanda.com/fullchain.pem
-/etc/letsencrypt/live/wa.domainanda.com/privkey.pem
-```
-
-Cek auto-renew:
+Let's Encrypt auto-renew:
 
 ```bash
+(crontab -l 2>/dev/null; echo "0 0 * * * sudo certbot renew --dry-run") | crontab -
 sudo certbot renew --dry-run
 ```
 
-### 7.5 Konfigurasi Apache final — pakai `wa-gateway.conf` saja
-
-Setelah Certbot selesai, **nonaktifkan dan hapus** file SSL bawaan Certbot (`wa-gateway-le-ssl.conf`). File itu berisi `DocumentRoot /var/www/html`.
+### 7.5 Konfigurasi Apache final
 
 ```bash
 sudo a2dissite wa-gateway-le-ssl.conf
 sudo rm -f /etc/apache2/sites-enabled/wa-gateway-le-ssl.conf
-```
-
-Edit **`wa-gateway.conf`** — satu file untuk port 80 dan 443:
-
-```bash
-sudo nano /etc/apache2/sites-available/wa-gateway.conf
-```
-
-Ganti isi file dengan:
-
-```apache
+sudo tee /etc/apache2/sites-available/wa-gateway.conf << 'EOF'
 <VirtualHost *:80>
     ServerName wa.domainanda.com
     RewriteEngine On
     RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
 </VirtualHost>
-
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
     ServerName wa.domainanda.com
@@ -237,16 +201,15 @@ Ganti isi file dengan:
     Include /etc/letsencrypt/options-ssl-apache.conf
     ProxyPreserveHost On
     ProxyRequests Off
-    # WebSocket — HARUS di atas ProxyPass /
     ProxyPass        /ws ws://127.0.0.1:8001/
     ProxyPassReverse /ws ws://127.0.0.1:8001/
-    # HTTP API
     ProxyPass        / http://127.0.0.1:8000/
     ProxyPassReverse / http://127.0.0.1:8000/
     ErrorLog  ${APACHE_LOG_DIR}/wa-ssl-error.log
     CustomLog ${APACHE_LOG_DIR}/wa-ssl-access.log combined
 </VirtualHost>
 </IfModule>
+EOF
 ```
 
 Pastikan hanya **`wa-gateway.conf`** yang aktif:
@@ -256,27 +219,12 @@ sudo a2ensite wa-gateway.conf
 sudo apache2ctl -S
 ```
 
-Harusnya hanya **satu** vhost `:443` untuk domain Anda (dari `wa-gateway.conf`).
-
 Reload Apache:
 
 ```bash
 sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
-
-### 7.6 Firewall (opsional, disarankan)
-
-```bash
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-```
-
-Port `8000` dan `8001` **tidak perlu** dibuka ke publik — cukup localhost + Apache proxy.
-
----
 
 ## Langkah 8 — Konfigurasi di Panel RLRADIUS
 
@@ -292,13 +240,10 @@ Buka **WhatsApp → Setting → Vendor ON-PREMISE**, isi:
 ---
 
 
-
-## Langkah 9 — Perpanjang SSL (manual)
-
-Auto-renew sudah aktif via Certbot. Jika perlu manual:
-
+## Langkah 9 — Perpanjang SSL (cara manual)
 ```bash
 sudo certbot renew
+
 sudo rm -f /etc/apache2/sites-enabled/wa-gateway-le-ssl.conf
 sudo systemctl reload apache2
 ```
@@ -316,7 +261,6 @@ pm2 restart wa
 ---
 
 ## Troubleshooting
-
 ### Network ERROR! di panel RLRADIUS
 Pesan **"Network ERROR!"** biasanya muncul karena:
 - Propagasi DNS belum selesai — domain belum dikenali jaringan Anda (tunggu beberapa jam)
