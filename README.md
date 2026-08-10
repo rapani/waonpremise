@@ -207,15 +207,7 @@ sudo tee /etc/apache2/sites-available/wa-gateway.conf << 'EOF'
 EOF
 ```
 
-Pastikan hanya **`wa-gateway.conf`** yang aktif:
-
-```bash
-sudo a2ensite wa-gateway.conf
-sudo apache2ctl -S
-```
-
 Reload Apache:
-
 ```bash
 sudo apache2ctl configtest
 sudo systemctl reload apache2
