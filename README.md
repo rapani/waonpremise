@@ -120,18 +120,13 @@ ping wa.domainanda.com
 
 ## Langkah 7 — Install Apache & Let's Encrypt
 
-### 7.1 Install Apache2
+### 7.1 Install Apache2 Aktifkan modul yang dibutuhkan
 
 ```bash
 sudo apt install -y apache2
 sudo systemctl enable apache2
 sudo systemctl start apache2
 sudo systemctl status apache2
-```
-
-### 7.2 Aktifkan modul yang dibutuhkan
-
-```bash
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_wstunnel
@@ -141,7 +136,7 @@ sudo a2enmod rewrite
 sudo systemctl restart apache2
 ```
 
-### 7.3 VirtualHost port 80 (sebelum SSL)
+### 7.2 VirtualHost port 80 (sebelum SSL)
 
 Isi file wa-gateway.conf untuk sementara waktu di pakai untuk verifikasi Let's Encrypt **hanya port 80**:
 
@@ -167,7 +162,7 @@ sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
 
-### 7.4 Install Certbot (Let's Encrypt)
+### 7.3 Install Certbot (Let's Encrypt)
 
 ```bash
 sudo apt install -y certbot python3-certbot-apache
@@ -181,7 +176,7 @@ Let's Encrypt auto-renew:
 sudo certbot renew --dry-run
 ```
 
-### 7.5 Konfigurasi Apache final
+### 7.4 Konfigurasi Apache final
 
 ```bash
 sudo a2dissite wa-gateway-le-ssl.conf
